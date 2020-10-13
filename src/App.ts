@@ -17,10 +17,13 @@ class App {
     });
   }
   private routes(controllers: {
-    forEach: (arg0: (controller: any) => void) => void;
+    forEach: (
+      arg: (controller: any, index: number, entireArray: any) => number
+    ) => void;
   }) {
-    controllers.forEach((controller) => {
+    controllers.forEach((controller, index, entireArray) => {
       this.app.use("/", controller.router);
+      return 1;
     });
   }
   public listen() {
