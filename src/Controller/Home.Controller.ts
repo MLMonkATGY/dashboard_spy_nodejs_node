@@ -12,9 +12,9 @@ class HomeController implements IControllerBase {
   public initRoutes() {
     this.router.get("/", this.service);
   }
-  private service = (req: Request, res: Response): Array<string> => {
+  private service = (req: Request, res: Response) => {
     const users = ["aasdsas", "111111"];
-    return users;
+    res.send(users);
   };
 }
 export default HomeController;
