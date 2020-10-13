@@ -1,14 +1,12 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "outDir": "./out",
-        "baseUrl": "./src",
-        "sourceMap": true
-    },
-    "compileOnSave": true,
-    "include": [
-        "src/**/*.ts"
-    ],
-   
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./out",
+    "baseUrl": "./src",
+    "sourceMap": true,
+    "esModuleInterop": true
+  },
+  "compileOnSave": true,
+  "include": ["src/**/*.ts"]
 }
