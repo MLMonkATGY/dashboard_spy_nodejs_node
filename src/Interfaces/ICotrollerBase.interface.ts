@@ -1,4 +1,4 @@
 interface iControllerBase {
-    initRoutes(): any
+  initRoutes(): any;
 }
 export default iControllerBase;
