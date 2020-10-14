@@ -1,9 +1,8 @@
 import { Application } from "express";
 import ioserver, { Socket } from "socket.io";
-import HomeEventHandler from "./EventController/Test.EventHandler";
-import TestEventHandler from "./EventController/Test2";
+
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
-import GetBatteryLevelJob from "./Jobs/GetBatteryLevelJob";
+import iRepeatJobBase from "./Interfaces/IRepeatJobBase.interface";
 const express = require("express");
 class App {
   public app: Application;
@@ -12,29 +11,37 @@ class App {
   public server: any;
   public io: any;
   public eventHandlers: Array<any>;
+  public jobHandler: Array<any>;
   constructor(appInit: {
     port: number;
     middleware: any;
     controller: any;
     websocketHandler: any;
+    jobHandler: any;
   }) {
     this.app = express();
     this.port = appInit.port;
     this.server = require("http").Server(this.app);
+    this.jobHandler = appInit.jobHandler;
     if (appInit.websocketHandler) {
       this.io = ioserver(this.server);
       this.eventHandlers = appInit.websocketHandler;
       this.io.on("connection", this.onConnectionHandler);
     }
 
-    // this.middlewares(app.middlewares);
     this.routes(appInit.controller);
-    let a = new GetBatteryLevelJob(2000);
-    a.run();
+    this.registerIntervalJobs(this.jobHandler);
   }
   private onConnectionHandler = (clientSocket: Socket) => {
     this.socketEventRegister(this.eventHandlers, clientSocket);
-    clientSocket.emit("aaa", "this is from server");
+    // clientSocket.emit("aaa", "this is from server");
+  };
+  private registerIntervalJobs = (jobs: {
+    forEach: (arg0: (job: any) => void) => void;
+  }) => {
+    jobs.forEach((job: iRepeatJobBase) => {
+      job.run(false);
+    });
   };
   private middlewares = (middleWares: {
     forEach: (arg0: (middleWare: any) => void) => void;
