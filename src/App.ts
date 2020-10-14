@@ -1,4 +1,5 @@
 import { Application } from "express";
+import SocketStore from "./Singleton/SocketStore";
 import ioserver, { Socket } from "socket.io";
 
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
@@ -12,6 +13,8 @@ class App {
   public io: any;
   public eventHandlers: Array<any>;
   public jobHandler: Array<any>;
+  public allConnectedSockets: Set<any>;
+  public socketStore: SocketStore;
   constructor(appInit: {
     port: number;
     middleware: any;
@@ -23,6 +26,7 @@ class App {
     this.port = appInit.port;
     this.server = require("http").Server(this.app);
     this.jobHandler = appInit.jobHandler;
+    this.socketStore = new SocketStore();
     if (appInit.websocketHandler) {
       this.io = ioserver(this.server);
       this.eventHandlers = appInit.websocketHandler;
@@ -35,11 +39,13 @@ class App {
   private onConnectionHandler = (clientSocket: Socket) => {
     this.socketEventRegister(this.eventHandlers, clientSocket);
     clientSocket.emit("alive", "this is from server");
+    this.socketStore.addSocket(clientSocket)
   };
   private registerIntervalJobs = (jobs: {
     forEach: (arg0: (job: any) => void) => void;
   }) => {
     jobs.forEach((job: iRepeatJobBase) => {
+      job.linkStore(this.socketStore)
       job.run(false);
     });
   };
@@ -61,7 +67,9 @@ class App {
       return 1;
     });
   };
-
+  public getAllConnectedSocket = () => {
+    return this.allConnectedSockets
+  }
   private socketEventRegister = (
     eventsHooks: {
       forEach: (

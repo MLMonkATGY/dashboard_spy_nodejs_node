@@ -1,12 +1,16 @@
 import { spawn } from "child_process";
+import SocketStore from "Singleton/SocketStore";
 import iRepeatJobBase from "../Interfaces/IRepeatJobBase.interface";
 class GetBatteryLevelJob implements iRepeatJobBase {
   private intervalUpdate: number;
-  private terminalCommand: string;
-
-  constructor(intervalUpdate, terminalCommand) {
+  private socketStore: SocketStore;
+  constructor(intervalUpdate) {
     this.intervalUpdate = intervalUpdate;
-    this.terminalCommand = terminalCommand;
+
+  }
+  public linkStore = (store) => {
+    this.socketStore = store;
+
   }
   public run = (runAtStartup: boolean) => {
     if (runAtStartup) {
@@ -15,25 +19,20 @@ class GetBatteryLevelJob implements iRepeatJobBase {
     setInterval(this.handler, this.intervalUpdate);
   };
   private handler = async () => {
-    const childProcess = spawn(this.terminalCommand);
-    let data = "";
-    for await (const chunk of childProcess.stdout) {
-      console.log("stdout chunk: " + chunk);
-      data += chunk;
-    }
-    let error = "";
-    for await (const chunk of childProcess.stderr) {
-      console.error("stderr chunk: " + chunk);
-      error += chunk;
-    }
-    const exitCode = await new Promise((resolve, reject) => {
-      childProcess.on("close", resolve);
-      console.log("closed resolve promise");
+    const lineReader = require('readline').createInterface({
+      input: require('fs').createReadStream('/sys/class/power_supply/battery/capacity')
     });
 
-    if (exitCode) {
-      throw new Error(`subprocess error exit ${exitCode}, ${error}`);
-    }
+    lineReader.on('line', (line: string) => {
+      let percentageLeft: number = Number(line);
+      let allActiveConn = this.socketStore.getAllSockets()
+      allActiveConn.forEach(element => {
+        element.emit("debug", percentageLeft)
+      });
+    });
+
+
+
   };
 }
 export default GetBatteryLevelJob;
