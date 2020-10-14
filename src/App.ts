@@ -34,7 +34,7 @@ class App {
   }
   private onConnectionHandler = (clientSocket: Socket) => {
     this.socketEventRegister(this.eventHandlers, clientSocket);
-    // clientSocket.emit("aaa", "this is from server");
+    clientSocket.emit("alive", "this is from server");
   };
   private registerIntervalJobs = (jobs: {
     forEach: (arg0: (job: any) => void) => void;

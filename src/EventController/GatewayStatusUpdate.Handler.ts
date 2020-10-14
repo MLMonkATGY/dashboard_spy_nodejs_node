@@ -5,13 +5,13 @@ import IControllerBase from "../Interfaces/ICotrollerBase.interface";
 import { Socket } from "socket.io";
 import IEventHandlerBase from "../Interfaces/IEventHandlerBase.interface";
 
-class HomeEventHandler implements IEventHandlerBase {
-  private eventName: string = "test1";
+class GatewayStatusUpdateEvent implements IEventHandlerBase {
+  private eventName: string = "gateway_status";
   public handler = (data: any): void => {
-    console.log("I got data", data);
+    console.log(this.eventName, " received", data);
   };
   public getEventName = () => {
     return this.eventName;
   };
 }
-export default HomeEventHandler;
+export default GatewayStatusUpdateEvent;
