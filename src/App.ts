@@ -24,8 +24,12 @@ class App {
   }) {
     this.app = express();
     this.port = appInit.port;
+    this.routes(appInit.controller);
+    this.middlewares(appInit.middleware)
     this.server = require("http").Server(this.app);
     this.jobHandler = appInit.jobHandler;
+    this.registerIntervalJobs(this.jobHandler);
+
     this.socketStore = new SocketStore();
     if (appInit.websocketHandler) {
       this.io = ioserver(this.server);
@@ -33,8 +37,7 @@ class App {
       this.io.on("connection", this.onConnectionHandler);
     }
 
-    this.routes(appInit.controller);
-    this.registerIntervalJobs(this.jobHandler);
+   
   }
   private onConnectionHandler = (clientSocket: Socket) => {
     this.socketEventRegister(this.eventHandlers, clientSocket);
@@ -46,7 +49,7 @@ class App {
   }) => {
     jobs.forEach((job: iRepeatJobBase) => {
       job.linkStore(this.socketStore)
-      job.run(false);
+      job.run(true);
     });
   };
   private middlewares = (middleWares: {
