@@ -34,5 +34,6 @@ class GetBatteryLevelJob implements iRepeatJobBase {
 
 
   };
+
 }
 export default GetBatteryLevelJob;
