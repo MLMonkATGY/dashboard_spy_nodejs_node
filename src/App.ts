@@ -15,11 +15,12 @@ class App {
   public jobHandler: Array<any>;
   public allConnectedSockets: Set<any>;
   public socketStore: SocketStore;
+  public socketEventMaps: Map<string, Function>;
   constructor(appInit: {
     port: number;
     middleware: any;
     controller: any;
-    websocketHandler: any;
+    websocketHandler: Array<IEventHandlerBase>;
     jobHandler: any;
   }) {
     this.app = express();
@@ -33,17 +34,33 @@ class App {
     this.socketStore = new SocketStore();
     if (appInit.websocketHandler) {
       this.io = ioserver(this.server);
+      this.socketEventMaps = new Map<string, Function>();
+      appInit.websocketHandler.forEach(handler => {
+        this.registerHooks(handler.getEventName(), handler.handler)
+      });
       this.eventHandlers = appInit.websocketHandler;
       this.io.on("connection", this.onConnectionHandler);
     }
-
    
   }
   private onConnectionHandler = (clientSocket: Socket) => {
-    this.socketEventRegister(this.eventHandlers, clientSocket);
-    clientSocket.emit("alive", "this is from server");
+    // this.socketEventRegister(this.eventHandlers, clientSocket);
+
     this.socketStore.addSocket(clientSocket)
+
+    let id = clientSocket.id
+    clientSocket.emit("alive", "this is from server");
+    clientSocket.on("generic_event", (data: any) => { 
+      if (data.event) { 
+        let customEvent = data.event;
+        this.socketEventMaps.get(customEvent)(data.payload, clientSocket, this.socketStore)
+    }
+    })
+    clientSocket.on("disconnect", (data:any) => { 
+      this.socketEventMaps.get("disconnect")(data, clientSocket, this.socketStore)
+    })
   };
+  
   private registerIntervalJobs = (jobs: {
     forEach: (arg0: (job: any) => void) => void;
   }) => {
@@ -70,25 +87,11 @@ class App {
       return 1;
     });
   };
-  public getAllConnectedSocket = () => {
-    return this.allConnectedSockets
-  }
-  private socketEventRegister = (
-    eventsHooks: {
-      forEach: (
-        arg: (
-          eventHandler: IEventHandlerBase,
-          index: number,
-          allHandler: Array<any>
-        ) => void
-      ) => void;
-    },
-    clientSocket: Socket
-  ) => {
-    eventsHooks.forEach((hook, index, ref) => {
-      clientSocket.on(hook.getEventName(), hook.handler);
-    });
-  };
+  
+  public registerHooks = (eventName : string, handler:Function) => {
+    this.socketEventMaps.set(eventName, handler)
+}
+
   public listen() {
     this.server.listen(this.port, () => {
       console.log(`App listening on the http://localhost:${this.port}`);

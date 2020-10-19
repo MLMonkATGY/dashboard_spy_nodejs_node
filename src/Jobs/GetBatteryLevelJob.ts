@@ -8,7 +8,7 @@ class GetBatteryLevelJob implements iRepeatJobBase {
     this.intervalUpdate = intervalUpdate;
 
   }
-  public linkStore = (store) => {
+  public linkStore = (store:SocketStore) => {
     this.socketStore = store;
 
   }
