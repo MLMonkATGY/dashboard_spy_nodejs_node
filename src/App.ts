@@ -29,14 +29,16 @@ class App {
     this.middlewares(appInit.middleware)
     this.server = require("http").Server(this.app);
     this.jobHandler = appInit.jobHandler;
+    this.socketStore = new SocketStore();
+
     this.registerIntervalJobs(this.jobHandler);
 
-    this.socketStore = new SocketStore();
     if (appInit.websocketHandler) {
       this.io = ioserver(this.server);
       this.socketEventMaps = new Map<string, Function>();
       appInit.websocketHandler.forEach(handler => {
         this.registerHooks(handler.getEventName(), handler.handler)
+        this.linkStore(handler)
       });
       this.eventHandlers = appInit.websocketHandler;
       this.io.on("connection", this.onConnectionHandler);
@@ -46,7 +48,6 @@ class App {
   private onConnectionHandler = (clientSocket: Socket) => {
     // this.socketEventRegister(this.eventHandlers, clientSocket);
 
-    this.socketStore.addSocket(clientSocket)
 
     let id = clientSocket.id
     clientSocket.emit("alive", "this is from server");
@@ -90,7 +91,11 @@ class App {
   
   public registerHooks = (eventName : string, handler:Function) => {
     this.socketEventMaps.set(eventName, handler)
-}
+
+  }
+  public linkStore = (handlerClass : IEventHandlerBase) => { 
+    handlerClass.linkStore(this.socketStore)
+  }
 
   public listen() {
     this.server.listen(this.port, () => {
