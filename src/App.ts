@@ -4,6 +4,7 @@ import ioserver, { Socket } from "socket.io";
 
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
 import iRepeatJobBase from "./Interfaces/IRepeatJobBase.interface";
+import iControllerBase from "Interfaces/ICotrollerBase.interface";
 const express = require("express");
 class App {
   public app: Application;
@@ -25,8 +26,10 @@ class App {
   }) {
     this.app = express();
     this.port = appInit.port;
-    this.routes(appInit.controller);
+    //middleware needs to be init before router
     this.middlewares(appInit.middleware)
+    this.routes(appInit.controller);
+
     this.server = require("http").Server(this.app);
     this.jobHandler = appInit.jobHandler;
     this.socketStore = new SocketStore();
@@ -80,11 +83,12 @@ class App {
 
   private routes = (controllers: {
     forEach: (
-      arg: (controller: any, index: number, entireArray: any) => number
+      arg: (controller: iControllerBase, index: number, entireArray: any) => number
     ) => void;
   }) => {
     controllers.forEach((controller, index, entireArray) => {
       this.app.use("/", controller.router);
+      controller.linkStore(this.socketStore)
       return 1;
     });
   };
