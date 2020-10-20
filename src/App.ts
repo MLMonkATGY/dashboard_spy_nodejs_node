@@ -5,6 +5,8 @@ import ioserver, { Socket } from "socket.io";
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
 import iRepeatJobBase from "./Interfaces/IRepeatJobBase.interface";
 import iControllerBase from "Interfaces/ICotrollerBase.interface";
+const EventEmitter = require('events');
+
 const express = require("express");
 class App {
   public app: Application;
@@ -17,6 +19,7 @@ class App {
   public allConnectedSockets: Set<any>;
   public socketStore: SocketStore;
   public socketEventMaps: Map<string, Function>;
+  public GlobalEventEmitter: any;
   constructor(appInit: {
     port: number;
     middleware: any;
@@ -27,12 +30,14 @@ class App {
     this.app = express();
     this.port = appInit.port;
     //middleware needs to be init before router
+    this.socketStore = new SocketStore();
+    this.GlobalEventEmitter  = new EventEmitter();
+
     this.middlewares(appInit.middleware)
     this.routes(appInit.controller);
 
     this.server = require("http").Server(this.app);
     this.jobHandler = appInit.jobHandler;
-    this.socketStore = new SocketStore();
 
     this.registerIntervalJobs(this.jobHandler);
 
@@ -45,6 +50,7 @@ class App {
       });
       this.eventHandlers = appInit.websocketHandler;
       this.io.on("connection", this.onConnectionHandler);
+
     }
    
   }
@@ -57,7 +63,7 @@ class App {
     clientSocket.on("generic_event", (data: any) => { 
       if (data.event) { 
         let customEvent = data.event;
-        this.socketEventMaps.get(customEvent)(data.payload, clientSocket, this.socketStore)
+        this.socketEventMaps.get(customEvent)(data.payload, clientSocket, this.socketStore, this.GlobalEventEmitter)
     }
     })
     clientSocket.on("disconnect", (data:any) => { 
@@ -89,6 +95,7 @@ class App {
     controllers.forEach((controller, index, entireArray) => {
       this.app.use("/", controller.router);
       controller.linkStore(this.socketStore)
+      controller.linkEventEmitter(this.GlobalEventEmitter);
       return 1;
     });
   };
