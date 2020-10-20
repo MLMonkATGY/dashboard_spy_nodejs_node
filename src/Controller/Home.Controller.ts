@@ -63,9 +63,9 @@ class HomeController implements IControllerBase {
     console.log(req.method, req.url, req.headers);
     let jsonBody = req.body
     let payloadList = []
-    this.eventEmitter.on("decryption_transfer", (decryptedPayload) => { 
+    this.eventEmitter.once("decryption_transfer", (decryptedPayload) => { 
       res.send(decryptedPayload)
-      this.eventEmitter.removeAllListeners()
+      // this.eventEmitter.removeAllListeners()
 
   })
     this.bonjourService.find({}, (service: bonjour.RemoteService) => { 
