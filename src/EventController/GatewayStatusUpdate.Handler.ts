@@ -9,7 +9,7 @@ import SocketStore from "Singleton/SocketStore";
 class GatewayStatusUpdateEvent implements IEventHandlerBase {
   private eventName: string = "gateway_status";
   private store: SocketStore;
-  public handler = (data: any, client:Socket, store : SocketStore): void => {
+  public handler = (data: any, client:Socket, store : SocketStore, eventEmitter:any): void => {
     console.log(this.eventName, "received :", data, "clientId :", client.id);
     store.addSocket(client, data.broadcastFunction)
     console.log("After adding size:",store.getAllSockets().has(data.broadcastFunction))

@@ -11,7 +11,7 @@ class DisconnectEventHandler implements IEventHandlerBase{
     /**
      * handler
      */
-    public handler(data:any, client:Socket, store : SocketStore) {
+    public handler(data:any, client:Socket, store : SocketStore, eventEmitter:any) {
         console.log("on disconnect", data)
         store.removeSocket(client.id)
         console.log("After removing size:",store.getAllSockets().has(data.broadcastFunction))
