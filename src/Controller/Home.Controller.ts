@@ -79,6 +79,25 @@ class HomeController implements IControllerBase {
     let jsonBody = req.body
     let expectedDeviceNum = jsonBody.devices.length
     let payloadList = []
+
+    let targetService: Socket = this.socketStore.getSocket("decrypt");
+    if (targetService == null) {
+      res.status(401).send();
+      this.eventEmitter.removeAllListeners()
+      return;
+    }
+    setTimeout(() => {
+      if (payloadList.length == 0) {
+        res.status(401).send();
+        this.eventEmitter.removeAllListeners()
+
+
+      } else {
+        targetService.emit("decrypt", payloadList)
+
+      }
+
+    }, 200)
     this.eventEmitter.once("decryption_transfer", (decryptedPayload) => {
       let responseJSON = {
         devices: []
@@ -107,17 +126,11 @@ class HomeController implements IControllerBase {
       let targetDevice = jsonBody.devices.filter(info => {
         return info.deviceId == service.txt.id
       })
-      if (targetDevice.length == 0) {
-        return
-      }
+
       let apiKey = targetDevice[0].apiKey
 
-      let targetService: Socket = this.socketStore.getSocket("decrypt");
-      if (targetService == null) {
-        return
-      }
+
       if (data1 != null && iv != null) {
-        let now = new Date()
         let payload = {
           apiKey,
           iv,
@@ -125,9 +138,7 @@ class HomeController implements IControllerBase {
         }
 
         payloadList.push(payload)
-        if ((payloadList.length) == expectedDeviceNum) {
-          targetService.emit("decrypt", payloadList)
-        }
+
 
       }
 

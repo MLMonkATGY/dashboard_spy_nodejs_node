@@ -20,7 +20,7 @@ const app: App = new App({
   ],
   jobHandler: [
     //  new ScanLocalDeviceJob(1000)
-    new GetBatteryLevelJob(4000),
+    // new GetBatteryLevelJob(4000),
   ],
 });
 
