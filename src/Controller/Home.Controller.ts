@@ -6,6 +6,7 @@ import bonjour from "bonjour"
 import IControllerBase from "../Interfaces/ICotrollerBase.interface";
 import SocketStore from "Singleton/SocketStore";
 import { Socket } from "socket.io";
+import * as os from "os";
 // import * as EventEmitter from 'events';
 const EventEmitter = require('events');
 
@@ -22,96 +23,118 @@ class HomeController implements IControllerBase {
     this.bonjourService = bonjour()
 
   }
-  
-  public linkStore(store: any) { 
+
+  public linkStore(store: any) {
     this.socketStore = store;
   }
-  
+
   public initRoutes() {
-    this.router.get("/", this.service);
+    this.router.get("/", this.discoveryService);
     this.router.post("/", this.service);
     this.router.post("/streamingDataSink", this.streamingDataSink);
     this.router.post("/pollStatus", this.getCurrentDeviceStatus);
 
   }
-  public linkEventEmitter = (eventEmitter:any) => {
+  public linkEventEmitter = (eventEmitter: any) => {
     this.eventEmitter = eventEmitter;
-   }
+  }
   public service = (req: Request, res: Response) => {
     const users = ["aasdsas", "111111"];
     res.send(users);
   };
-  public streamingDataSink = (req: Request, res: Response) => { 
+  public streamingDataSink = (req: Request, res: Response) => {
     // let data = JSON.(req)
     console.log(req.method, req.url, req.headers);
     let jsonBody = req.body
-    
+
     // await JSON.parse(req)
   }
   public discoveryService = (req: Request, res: Response) => {
-    const discoveryDTO: DiscoveryBroadcastDTO = req.body;
-    if (discoveryDTO.deviceId !== "70:85:c2:7d:af:77") { 
-      res.status(403).send()
+    // const discoveryDTO: DiscoveryBroadcastDTO = req.body;
+    // if (discoveryDTO.deviceId !== "70:85:c2:7d:af:77") {
+    //   res.status(403).send()
+    // }
+    let networkInterfaces = os.networkInterfaces();
+    let mac: string = "";
+    let ip: string = "";
+    if (networkInterfaces.wifi0) {
+      mac = networkInterfaces.wifi0[0].mac;
+      ip = networkInterfaces.wifi0[0].address;
+
+    } else if (networkInterfaces.eth0) {
+      mac = networkInterfaces.eth0[0].mac;
+      ip = networkInterfaces.eth0[0].address;
+
     }
+
     let responseData: DiscoveryBroadcastDTO = {
-      deviceId: "aaa",
-      localAddress : "local"
+      deviceId: mac,
+      localAddress: ip,
+      broadcastService: "gateway"
     }
     res.send(responseData)
   }
-  public getCurrentDeviceStatus = (req: Request, res: Response) => { 
+  public getCurrentDeviceStatus = (req: Request, res: Response) => {
     console.log(req.method, req.url, req.headers);
     let jsonBody = req.body
+    let expectedDeviceNum = jsonBody.devices.length
     let payloadList = []
-    this.eventEmitter.once("decryption_transfer", (decryptedPayload) => { 
-      res.send(decryptedPayload)
-      // this.eventEmitter.removeAllListeners()
+    this.eventEmitter.once("decryption_transfer", (decryptedPayload) => {
+      let responseJSON = {
+        devices: []
+      }
+      // if (decryptedPayload)
+      //   decryptedPayload = [JSON.parse(decryptedPayload)]
+      decryptedPayload.forEach(element => {
+        let modifiedState = JSON.parse(element)
+        modifiedState.state = modifiedState.switch
+        modifiedState.switch = null
+        responseJSON.devices.push(modifiedState)
 
-  })
-    this.bonjourService.find({}, (service: bonjour.RemoteService) => { 
+      });
+
+      res.send(responseJSON)
+
+
+    })
+    this.bonjourService.find({}, (service: bonjour.RemoteService) => {
       // console.log(service)
-      if (service.type != "ewelink") { 
+      if (service.type != "ewelink") {
         return
       }
       let data1 = service.txt.data1;
       let iv = service.txt.iv
       let targetDevice = jsonBody.devices.filter(info => {
-        return info.deviceId ==service.txt.id
+        return info.deviceId == service.txt.id
       })
-      if (targetDevice.length == 0) { 
+      if (targetDevice.length == 0) {
         return
       }
       let apiKey = targetDevice[0].apiKey
 
-      let targetService :Socket = this.socketStore.getSocket("decrypt");
-      if (targetService == null) { 
+      let targetService: Socket = this.socketStore.getSocket("decrypt");
+      if (targetService == null) {
         return
-    }
-      if (data1 != null && iv != null) { 
-        let now =  new Date()
-          let payload = {
-            apiKey,
-            iv,
-              data1
-          }
-          
+      }
+      if (data1 != null && iv != null) {
+        let now = new Date()
+        let payload = {
+          apiKey,
+          iv,
+          data1
+        }
+
         payloadList.push(payload)
-        if ((payloadList.length) > 1) {
-          targetService.emit("decrypt", payloadList)       }
+        if ((payloadList.length) == expectedDeviceNum) {
+          targetService.emit("decrypt", payloadList)
+        }
 
-         }
-       
-     
+      }
+
+
     })
-    
-  }
-  public decryptionEventManager =  (targetService, payload, resp:Response) => { 
-    this.eventEmitter.on("decryption_transfer", (decryptedPayload) => { 
-      resp.send(decryptedPayload)
-      // this.eventEmitter.removeAllListeners()
-    })
-    targetService.emit("decrypt", payload) 
 
   }
+
 }
 export default HomeController;
