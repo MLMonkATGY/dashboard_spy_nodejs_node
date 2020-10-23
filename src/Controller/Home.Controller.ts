@@ -86,15 +86,13 @@ class HomeController implements IControllerBase {
       this.eventEmitter.removeAllListeners()
       return;
     }
-    setTimeout(() => {
+    let timer = setTimeout(() => {
       if (payloadList.length == 0) {
         res.status(401).send();
         this.eventEmitter.removeAllListeners()
-
-
       } else {
+        console.log("Going thorugh timer")
         targetService.emit("decrypt", payloadList)
-
       }
 
     }, 200)
@@ -138,7 +136,11 @@ class HomeController implements IControllerBase {
         }
 
         payloadList.push(payload)
-
+        if (payloadList.length == expectedDeviceNum) {
+          clearTimeout(timer)
+          console.log("Going direct")
+          targetService.emit("decrypt", payloadList)
+        }
 
       }
 
