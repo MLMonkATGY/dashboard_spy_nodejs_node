@@ -16,11 +16,11 @@ const app: App = new App({
   websocketHandler: [
     new GatewayStatusUpdate(),
     new DisconnectEventHandler()
-  , new ReceiveDecryptedEvent()
+    , new ReceiveDecryptedEvent()
   ],
   jobHandler: [
-  //  new ScanLocalDeviceJob(1000)
-    // new GetBatteryLevelJob(4000, "ls"),
+    //  new ScanLocalDeviceJob(1000)
+    new GetBatteryLevelJob(4000),
   ],
 });
 

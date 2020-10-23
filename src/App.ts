@@ -31,7 +31,7 @@ class App {
     this.port = appInit.port;
     //middleware needs to be init before router
     this.socketStore = new SocketStore();
-    this.GlobalEventEmitter  = new EventEmitter();
+    this.GlobalEventEmitter = new EventEmitter();
 
     this.middlewares(appInit.middleware)
     this.routes(appInit.controller);
@@ -52,7 +52,7 @@ class App {
       this.io.on("connection", this.onConnectionHandler);
 
     }
-   
+
   }
   private onConnectionHandler = (clientSocket: Socket) => {
     // this.socketEventRegister(this.eventHandlers, clientSocket);
@@ -60,17 +60,17 @@ class App {
 
     let id = clientSocket.id
     clientSocket.emit("alive", "this is from server");
-    clientSocket.on("generic_event", (data: any) => { 
-      if (data.event) { 
+    clientSocket.on("generic_event", (data: any) => {
+      if (data.event) {
         let customEvent = data.event;
         this.socketEventMaps.get(customEvent)(data.payload, clientSocket, this.socketStore, this.GlobalEventEmitter)
-    }
+      }
     })
-    clientSocket.on("disconnect", (data:any) => { 
+    clientSocket.on("disconnect", (data: any) => {
       this.socketEventMaps.get("disconnect")(data, clientSocket, this.socketStore)
     })
   };
-  
+
   private registerIntervalJobs = (jobs: {
     forEach: (arg0: (job: any) => void) => void;
   }) => {
@@ -99,18 +99,18 @@ class App {
       return 1;
     });
   };
-  
-  public registerHooks = (eventName : string, handler:Function) => {
+
+  public registerHooks = (eventName: string, handler: Function) => {
     this.socketEventMaps.set(eventName, handler)
 
   }
-  public linkStore = (handlerClass : IEventHandlerBase) => { 
+  public linkStore = (handlerClass: IEventHandlerBase) => {
     handlerClass.linkStore(this.socketStore)
   }
 
   public listen() {
     this.server.listen(this.port, () => {
-      console.log(`App listening on the http://localhost:${this.port}`);
+      console.log(`App listening on the http://0.0.0.0:${this.port}`);
     });
   }
 }

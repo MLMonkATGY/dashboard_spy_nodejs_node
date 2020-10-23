@@ -9,44 +9,44 @@ class ScanLocalDeviceJob implements iRepeatJobBase {
 
     constructor(intervalUpdate: number) {
         this.intervalUpdate = intervalUpdate;
-        this.scanOption = {            
+        this.scanOption = {
         }
         this.bonjourService = bonjour()
-     }
-    public run = () => { 
-        setInterval( this.handler, this.intervalUpdate)
     }
-    public linkStore(store: any) { 
+    public run = () => {
+        setInterval(this.handler, this.intervalUpdate)
+    }
+    public linkStore(store: any) {
         this.socketStore = store;
     }
-    public handler = () => { 
-        this.bonjourService.find(this.scanOption, (service:bonjour.RemoteService) => { 
-            if (!service.txt.data1) { 
+    public handler = () => {
+        this.bonjourService.find(this.scanOption, (service: bonjour.RemoteService) => {
+            if (!service.txt.data1) {
                 return
             }
             let now = new Date()
             console.log("Timenow at start : ", now.getTime())
             let data1 = service.txt.data1;
             let iv = service.txt.iv
-            let apiKey = "6a55cae4-ba5d-4377-b941-247eb2036477"
+            let apiKey = ""
             let targetService = this.socketStore.getSocket("decrypt")
-            if (targetService == null) { 
+            if (targetService == null) {
                 return
             }
-            if (data1  != null && iv != null){ 
+            if (data1 != null && iv != null) {
                 let payload = {
                     apiKey,
                     iv,
                     data1
                 }
 
-                targetService.emit("decrypt", payload) 
+                targetService.emit("decrypt", payload)
                 console.log("Timenow at sent : ", now.getTime())
 
             }
-           
+
         })
     }
 
- }
+}
 export default ScanLocalDeviceJob

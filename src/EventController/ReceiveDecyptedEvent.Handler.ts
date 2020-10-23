@@ -2,22 +2,22 @@ import IEventHandlerBase from "Interfaces/IEventHandlerBase.interface";
 import SocketStore from "Singleton/SocketStore";
 import { Socket } from "socket.io";
 
-class ReceiveDecryptedEvent implements IEventHandlerBase { 
+class ReceiveDecryptedEvent implements IEventHandlerBase {
     private eventName: string = "decryption_done";
-    private store: any; 
+    private store: any;
     private contextReso: Response;
     constructor() {
-        
+
     }
     /**
      * handler
      */
-    public handler(data: any, client: Socket, store: SocketStore, eventEmitter:any) {
+    public handler(data: any, client: Socket, store: SocketStore, eventEmitter: any) {
         if (data.error) {
-            console.log("on receive decrypted", data.error)
+            console.log("Error : on receive decrypted", data.error)
             eventEmitter.emit("decryption_transfer", data)
 
-        } else { 
+        } else {
             let now = new Date()
             console.log("Timenow at received : ", now.getTime())
             console.log("on receive decrypted", data)
@@ -30,8 +30,8 @@ class ReceiveDecryptedEvent implements IEventHandlerBase {
     public getEventName = () => {
         return this.eventName;
     };
-    public linkStore = (store : any) => { 
-        this.store = store; 
+    public linkStore = (store: any) => {
+        this.store = store;
     }
-}   
+}
 export default ReceiveDecryptedEvent;

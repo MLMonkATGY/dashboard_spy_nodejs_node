@@ -1,6 +1,7 @@
 import { spawn } from "child_process";
 import SocketStore from "Singleton/SocketStore";
 import iRepeatJobBase from "../Interfaces/IRepeatJobBase.interface";
+
 class GetBatteryLevelJob implements iRepeatJobBase {
   private intervalUpdate: number;
   private socketStore: SocketStore;
@@ -8,7 +9,7 @@ class GetBatteryLevelJob implements iRepeatJobBase {
     this.intervalUpdate = intervalUpdate;
 
   }
-  public linkStore = (store:SocketStore) => {
+  public linkStore = (store: SocketStore) => {
     this.socketStore = store;
 
   }
@@ -22,6 +23,7 @@ class GetBatteryLevelJob implements iRepeatJobBase {
     const lineReader = require('readline').createInterface({
       input: require('fs').createReadStream('/sys/class/power_supply/battery/capacity')
     });
+
 
     lineReader.on('line', (line: string) => {
       let percentageLeft: number = Number(line);
