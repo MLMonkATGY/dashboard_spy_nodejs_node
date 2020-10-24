@@ -79,6 +79,7 @@ class HomeController implements IControllerBase {
     let jsonBody = req.body
     let expectedDeviceNum = jsonBody.devices.length
     let payloadList = []
+    let ipListInOrder = []
 
     let targetService: Socket = this.socketStore.getSocket("decrypt");
     if (targetService == null) {
@@ -102,10 +103,12 @@ class HomeController implements IControllerBase {
       }
       // if (decryptedPayload)
       //   decryptedPayload = [JSON.parse(decryptedPayload)]
-      decryptedPayload.forEach(element => {
+      decryptedPayload.forEach((element, index) => {
         let modifiedState = JSON.parse(element)
-        modifiedState.state = modifiedState.switch
+        modifiedState.state = modifiedState.switch === "on"
         modifiedState.switch = null
+        modifiedState.deviceId = jsonBody.devices[index].deviceId
+        modifiedState.localAddress = ipListInOrder[index]
         responseJSON.devices.push(modifiedState)
 
       });
@@ -136,6 +139,7 @@ class HomeController implements IControllerBase {
         }
 
         payloadList.push(payload)
+        ipListInOrder.push(service.referer.address)
         if (payloadList.length == expectedDeviceNum) {
           clearTimeout(timer)
           console.log("Going direct")
