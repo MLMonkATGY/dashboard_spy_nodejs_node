@@ -80,7 +80,7 @@ class HomeController implements IControllerBase {
     let expectedDeviceNum = jsonBody.devices.length
     let payloadList = []
     let ipListInOrder = []
-
+    let payloadIpMap = {}
     let targetService: Socket = this.socketStore.getSocket("decrypt");
     if (targetService == null) {
       res.status(401).send();
@@ -96,19 +96,18 @@ class HomeController implements IControllerBase {
         targetService.emit("decrypt", payloadList)
       }
 
-    }, 200)
+    }, 400)
     this.eventEmitter.once("decryption_transfer", (decryptedPayload) => {
       let responseJSON = {
         devices: []
       }
       // if (decryptedPayload)
       //   decryptedPayload = [JSON.parse(decryptedPayload)]
-      decryptedPayload.forEach((element, index) => {
-        let modifiedState = JSON.parse(element)
+      decryptedPayload.forEach((element) => {
+        let modifiedState = element
         modifiedState.state = modifiedState.switch === "on"
         modifiedState.switch = null
-        modifiedState.deviceId = jsonBody.devices[index].deviceId
-        modifiedState.localAddress = ipListInOrder[index]
+        
         responseJSON.devices.push(modifiedState)
 
       });
@@ -127,15 +126,22 @@ class HomeController implements IControllerBase {
       let targetDevice = jsonBody.devices.filter(info => {
         return info.deviceId == service.txt.id
       })
+      let apiKey: string = "";
+      if (targetDevice[0] != null) {
+        apiKey = targetDevice[0].apiKey
 
-      let apiKey = targetDevice[0].apiKey
+      } else { 
+        return;
+      }
 
 
       if (data1 != null && iv != null) {
         let payload = {
           apiKey,
           iv,
-          data1
+          data1,
+          localAddress: service.referer.address,
+          deviceId : service.txt.id
         }
 
         payloadList.push(payload)

@@ -13,7 +13,7 @@ class ReceiveDecryptedEvent implements IEventHandlerBase {
      * handler
      */
     public handler(data: any, client: Socket, store: SocketStore, eventEmitter: any) {
-        if (data.error) {
+        if (data[0].error) {
             console.log("Error : on receive decrypted", data.error)
             eventEmitter.emit("decryption_transfer", data)
 
