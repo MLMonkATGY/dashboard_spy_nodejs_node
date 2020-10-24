@@ -33,6 +33,7 @@ class HomeController implements IControllerBase {
     this.router.post("/", this.service);
     this.router.post("/streamingDataSink", this.streamingDataSink);
     this.router.post("/pollStatus", this.getCurrentDeviceStatus);
+    this.router.get("/batteryLevel", this.getBatteryLevel);
 
   }
   public linkEventEmitter = (eventEmitter: any) => {
@@ -73,6 +74,21 @@ class HomeController implements IControllerBase {
       broadcastService: "gateway"
     }
     res.send(responseData)
+  }
+  public getBatteryLevel = async (req: Request, res: Response) => { 
+    const lineReader = require('readline').createInterface({
+      input: require('fs').createReadStream('/sys/class/power_supply/battery/capacity')
+    });
+
+
+    lineReader.on('line', (line: string) => {
+      let batteryLevel: number = Number(line);
+      res.send({
+        batteryLevel
+      })
+     
+    });
+   
   }
   public getCurrentDeviceStatus = (req: Request, res: Response) => {
     console.log(req.method, req.url, req.headers);
