@@ -2,13 +2,15 @@ import { DiscoveryBroadcastDTO } from "DTO/DiscoveryBroadcastDTO";
 import * as express from "express";
 import { Request, Response } from "express";
 import bonjour from "bonjour"
+import {createConnection, createConnections} from "typeorm";
 
 import IControllerBase from "../Interfaces/ICotrollerBase.interface";
 import SocketStore from "Singleton/SocketStore";
 import { Socket } from "socket.io";
 import * as os from "os";
 // import * as EventEmitter from 'events';
-const EventEmitter = require('events');
+// const EventEmitter = require('events');
+import  EventEmitter from 'events';
 
 class HomeController implements IControllerBase {
   public path: string = "/";
@@ -33,7 +35,7 @@ class HomeController implements IControllerBase {
     this.router.post("/", this.service);
     this.router.post("/streamingDataSink", this.streamingDataSink);
     this.router.post("/pollStatus", this.getCurrentDeviceStatus);
-    this.router.get("/batteryLevel", this.getBatteryLevel);
+    // this.router.get("/batteryLevel", this.getBatteryLevel);
 
   }
   public linkEventEmitter = (eventEmitter: any) => {
@@ -50,11 +52,13 @@ class HomeController implements IControllerBase {
 
     // await JSON.parse(req)
   }
-  public discoveryService = (req: Request, res: Response) => {
+  public discoveryService = async(req: Request, res: Response) => {
     // const discoveryDTO: DiscoveryBroadcastDTO = req.body;
     // if (discoveryDTO.deviceId !== "70:85:c2:7d:af:77") {
     //   res.status(403).send()
     // }
+    const conn = await createConnection();
+    // await conn.synchronize();
     let networkInterfaces = os.networkInterfaces();
     let mac: string = "";
     let ip: string = "";
@@ -75,21 +79,21 @@ class HomeController implements IControllerBase {
     }
     res.send(responseData)
   }
-  public getBatteryLevel = async (req: Request, res: Response) => { 
-    const lineReader = require('readline').createInterface({
-      input: require('fs').createReadStream('/sys/class/power_supply/battery/capacity')
-    });
+  // public getBatteryLevel = async (req: Request, res: Response) => { 
+  //   const lineReader = require('readline').createInterface({
+  //     input: require('fs').createReadStream('/sys/class/power_supply/battery/capacity')
+  //   });
 
 
-    lineReader.on('line', (line: string) => {
-      let batteryLevel: number = Number(line);
-      res.send({
-        batteryLevel
-      })
+  //   lineReader.on('line', (line: string) => {
+  //     let batteryLevel: number = Number(line);
+  //     res.send({
+  //       batteryLevel
+  //     })
      
-    });
+  //   });
    
-  }
+  // }
   public getCurrentDeviceStatus = (req: Request, res: Response) => {
     console.log(req.method, req.url, req.headers);
     let jsonBody = req.body
