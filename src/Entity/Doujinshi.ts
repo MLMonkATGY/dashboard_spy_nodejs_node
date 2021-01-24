@@ -1,17 +1,15 @@
-import {Entity, PrimaryGeneratedColumn, Column, PrimaryColumn, Index, OneToOne, JoinColumn, ManyToOne} from "typeorm";
-import Author from "./Author";
+import {PrimaryKey, Cascade, Collection, Entity, OneToMany, Property, ManyToOne } from '@mikro-orm/core';
+import Author from './Author.js';
 @Entity()
 class Doujinshi {
-    @Index({ unique: true })
-    @PrimaryColumn()
+    @PrimaryKey()
     id: number;
-    @Column()
+    @Property()
     name:string;
-    @Column()
+    @Property()
     thumbnail:string;
 
-    @ManyToOne(() => Author, author=>author.doujins)
-    @JoinColumn()
+    @ManyToOne(() => Author)
     author : Author; 
 
 }

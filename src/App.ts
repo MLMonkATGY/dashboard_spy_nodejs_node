@@ -1,6 +1,7 @@
 import { Application } from "express";
 import SocketStore from "./Singleton/SocketStore.js";
 import ioserver, { Socket } from "socket.io";
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
 import iRepeatJobBase from "./Interfaces/IRepeatJobBase.interface";
@@ -8,9 +9,12 @@ import iControllerBase from "Interfaces/ICotrollerBase.interface";
 import EventEmitter from 'events';
 import express from "express";
 import * as http from "http";
-// const EventEmitter = require('events');
+import { createConnection } from "typeorm";
+import { EntityManager, EntityRepository, MikroORM, RequestContext } from '@mikro-orm/core';
+import Doujinshi from "./Entity/Doujinshi.js";
+import Author from "./Entity/Author.js";
+import {default as setup} from "./Seed/CreateSchema.js";
 
-// const express = require("express");
 class App {
   public app: Application;
   public port: number;
@@ -23,6 +27,7 @@ class App {
   public socketStore: SocketStore;
   public socketEventMaps: Map<string, Function>;
   public GlobalEventEmitter: any;
+  public dbconnection : any
   constructor(appInit: {
     port: number;
     middleware: any;
@@ -32,6 +37,7 @@ class App {
   }) {
     this.app = express();
     this.port = appInit.port;
+
     //middleware needs to be init before router
     this.socketStore = new SocketStore();
     this.GlobalEventEmitter = new EventEmitter.EventEmitter();
@@ -74,11 +80,22 @@ class App {
     })
   };
 
-  private registerIntervalJobs = (jobs: {
+  private registerIntervalJobs = async (jobs: {
     forEach: (arg0: (job: any) => void) => void;
   }) => {
+   const conn = await MikroORM.init( {
+
+    entities: [Doujinshi, Author],
+    dbName: 'alextay96',
+    type: 'postgresql',
+    clientUrl: 'postgresql://alextay96@127.0.0.1:5432',
+    user: 'alextay96',
+    password: "Iamalextay96" // defaults to 'mongodb://localhost:27017' for mongodb driver
+});
+  // const repo = conn.em.getRepository(Author);
+  // let a = await repo.count()
     jobs.forEach((job: iRepeatJobBase) => {
-      job.linkStore(this.socketStore)
+      // job.linkStore(this.dbconnection)
       job.run(true);
     });
   };
