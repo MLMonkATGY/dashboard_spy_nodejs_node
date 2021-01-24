@@ -1,19 +1,13 @@
-import {Entity, PrimaryGeneratedColumn, Column} from "typeorm";
+import {Entity, PrimaryGeneratedColumn, Column, PrimaryColumn, Index, OneToMany} from "typeorm";
+import Doujinshi from "./Doujinshi";
 
 @Entity()
 class Author {
-
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    firstName: string;
-
-    @Column()
-    lastName: string;
-
-    @Column()
-    isActive: boolean;
-
+    @Index({ unique: true })
+    @PrimaryColumn()
+    name: string;
+    
+    @OneToMany(() => Doujinshi, doujin => doujin.author)
+    doujins : Doujinshi[];
 }
 export default Author;
