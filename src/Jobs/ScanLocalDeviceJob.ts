@@ -1,6 +1,6 @@
 import iRepeatJobBase from "Interfaces/IRepeatJobBase.interface";
 import bonjour from "bonjour"
-import SocketStore from "Singleton/SocketStore";
+import SocketStore from "Singleton/SocketStore.js";
 class ScanLocalDeviceJob implements iRepeatJobBase {
     private intervalUpdate: number;
     private bonjourService: bonjour.Bonjour;

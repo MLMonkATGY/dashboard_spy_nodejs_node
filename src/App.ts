@@ -1,13 +1,16 @@
 import { Application } from "express";
-import SocketStore from "./Singleton/SocketStore";
+import SocketStore from "./Singleton/SocketStore.js";
 import ioserver, { Socket } from "socket.io";
 
 import IEventHandlerBase from "./Interfaces/IEventHandlerBase.interface";
 import iRepeatJobBase from "./Interfaces/IRepeatJobBase.interface";
 import iControllerBase from "Interfaces/ICotrollerBase.interface";
-const EventEmitter = require('events');
+import EventEmitter from 'events';
+import express from "express";
+import * as http from "http";
+// const EventEmitter = require('events');
 
-const express = require("express");
+// const express = require("express");
 class App {
   public app: Application;
   public port: number;
@@ -31,12 +34,12 @@ class App {
     this.port = appInit.port;
     //middleware needs to be init before router
     this.socketStore = new SocketStore();
-    this.GlobalEventEmitter = new EventEmitter();
+    this.GlobalEventEmitter = new EventEmitter.EventEmitter();
 
     this.middlewares(appInit.middleware)
     this.routes(appInit.controller);
 
-    this.server = require("http").Server(this.app);
+    this.server = new http.Server(this.app);
     this.jobHandler = appInit.jobHandler;
 
     this.registerIntervalJobs(this.jobHandler);
