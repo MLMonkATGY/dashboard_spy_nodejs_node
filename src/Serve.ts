@@ -8,10 +8,11 @@ import ScanLocalDeviceJob from "./Jobs/ScanLocalDeviceJob.js";
 import ReceiveDecryptedEvent from "./EventController/ReceiveDecyptedEvent.Handler.js";
 import SeedWhiteList from "./Seed/SeedAuthor.js"
 import setupSchema from "./Seed/CreateSchema.js";
+import GetThumbnailByAuthor from "./Jobs/GetThmbnailByAuthor.js";
 
   
 const app: App = new App({
-    port: 7971,
+    port: 7900,
     controller: [
       // new HomeController()
     
@@ -27,12 +28,12 @@ const app: App = new App({
     ],
     jobHandler: [
       // new SeedWihiteList()
-      //  new ScanLocalDeviceJob(1000)
+      new GetThumbnailByAuthor()
       // new GetBatteryLevelJob(4000),
     ],
   });
 // setupSchema();
-SeedWhiteList();
+// SeedWhiteList();
 app.listen();
   
 
