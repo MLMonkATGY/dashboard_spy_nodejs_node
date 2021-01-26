@@ -4,7 +4,8 @@ import Doujinshi from './Doujinshi.js';
 class Author {
     @PrimaryKey()
     name: string;
-   
+    @Property()
+    numOfWork:number = 0;
     
     @OneToMany(() => Doujinshi, doujin=>doujin.author)
     author : Doujinshi[]; 

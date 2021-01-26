@@ -131,8 +131,8 @@ class App {
 
   public listen() {
     this.server.listen(this.port,async () => {
-      await setupSchema();
-      await SeedWhiteList();
+      // await setupSchema();
+      // await SeedWhiteList();
       console.log(`App listening on the http://0.0.0.0:${this.port}`);
     });
   }
