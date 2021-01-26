@@ -14,7 +14,8 @@ import { EntityManager, EntityRepository, MikroORM, RequestContext } from '@mikr
 import Doujinshi from "./Entity/Doujinshi.js";
 import Author from "./Entity/Author.js";
 import {default as setup} from "./Seed/CreateSchema.js";
-
+import SeedWhiteList from "./Seed/SeedAuthor.js"
+import setupSchema from "./Seed/CreateSchema.js";
 class App {
   public app: Application;
   public port: number;
@@ -129,7 +130,9 @@ class App {
   }
 
   public listen() {
-    this.server.listen(this.port, () => {
+    this.server.listen(this.port,async () => {
+      await setupSchema();
+      await SeedWhiteList();
       console.log(`App listening on the http://0.0.0.0:${this.port}`);
     });
   }
