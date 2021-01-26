@@ -8,6 +8,7 @@ import ScanLocalDeviceJob from "./Jobs/ScanLocalDeviceJob.js";
 import ReceiveDecryptedEvent from "./EventController/ReceiveDecyptedEvent.Handler.js";
 
 import GetThumbnailByAuthor from "./Jobs/GetThmbnailByAuthor.js";
+import DownloadThumbnail from "./Jobs/DownloadThumbnail.js";
 
   
 const app: App = new App({
@@ -27,7 +28,9 @@ const app: App = new App({
     ],
     jobHandler: [
       // new SeedWihiteList()
-      new GetThumbnailByAuthor()
+      // new GetThumbnailByAuthor(),
+      new DownloadThumbnail()
+
       // new GetBatteryLevelJob(4000),
     ],
   });

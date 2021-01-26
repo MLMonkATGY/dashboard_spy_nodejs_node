@@ -8,9 +8,16 @@ class Doujinshi {
     name:string;
     @Property()
     thumbnail:string;
-
+    @Property()
+    tags : string = "";
     @ManyToOne(() => Author)
     author : Author; 
+    constructor(id:number, name:string, thumbnail:string , author : Author){
+        this.id = id;
+        this.name = name;
+        this.thumbnail = thumbnail;
+        this.author = author;
 
+    }
 }
 export default Doujinshi;

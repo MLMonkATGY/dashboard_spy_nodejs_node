@@ -232,9 +232,9 @@ browser:BrowserContext, payload:string[]   */
   }
   
   private handler = async () => {
-    let allBrowser:BrowserContext[] = await this.generateBrowserContext(10)
+    let allBrowser:BrowserContext[] = await this.generateBrowserContext(5)
     
-    await this.getAuthorDoujinshiNum(allBrowser, 6);
+    await this.getAuthorDoujinshiNum(allBrowser, 4);
 
     
 

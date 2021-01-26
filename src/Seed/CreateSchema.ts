@@ -9,7 +9,7 @@ import {default as settings} from "../Db/GetDbSettings.js"
 
 const setupSchema = async () => {
   const orm = await MikroORM.init({
-    entities: [Author, Doujinshi],
+    entities: [Author,Doujinshi],
     dbName: 'alextay96',
     type: 'postgresql',
     clientUrl: 'postgresql://alextay96@127.0.0.1:5432',
@@ -20,7 +20,7 @@ const setupSchema = async () => {
 
   await generator.dropSchema();
   await generator.createSchema();
-
+  // await generator.updateSchema()
   await orm.close(true);
 };
 export default setupSchema;
