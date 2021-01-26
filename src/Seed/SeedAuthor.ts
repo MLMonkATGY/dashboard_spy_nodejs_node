@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import SocketStore from "Singleton/SocketStore";
 import iRepeatJobBase from "../Interfaces/IRepeatJobBase.interface";
-import {default as blacklist} from "../../resources/interim/blackList.js/index.js";
+import {default as blacklist} from "../../resources/interim/blackList.js";
 import Author from "../Entity/Author.js";
 import Doujinshi from "../Entity/Doujinshi.js";
 
